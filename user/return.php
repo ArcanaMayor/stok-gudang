@@ -113,85 +113,70 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
             <?php endif; ?>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-1">
-                    <div class="card p-6">
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Kembalikan Buku</h2>
+            <div>
 
-                        <form method="POST" id="returnForm">
-                            <input type="hidden" name="action" value="return">
-
-                            <div class="form-group mb-4">
-                                <label>Pilih Buku yang Dikembalikan *</label>
-                                <select name="loan_id" id="loan_id" required>
-                                    <option value="">-- Pilih Buku --</option>
-                                    <?php foreach ($current_loans as $loan): ?>
-                                    <option value="<?php echo $loan['id']; ?>">
-                                        <?php echo htmlspecialchars(substr($loan['title'], 0, 40)); ?>
-                                    </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-
-                            <div class="p-4 bg-green-50 dark:bg-green-900 rounded-lg mb-4">
-                                <p class="text-xs text-green-600 dark:text-green-300">
-                                    <strong>Info:</strong> Pastikan buku dalam kondisi baik sebelum dikembalikan.
-                                </p>
-                            </div>
-
-                            <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2" <?php echo count($current_loans) === 0 ? 'disabled' : ''; ?>>
-                                <i class="ph ph-tray-arrow-down text-xl"></i> Kembalikan Buku
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="lg:col-span-2">
-                    <div class="card p-6 mb-8">
+                <div class="card p-6 mb-8">
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Buku yang Harus Dikembalikan (<?php echo count($current_loans); ?>)</h2>
 
                         <?php if (count($current_loans) > 0): ?>
                         <div class="space-y-4">
-                            <?php foreach ($current_loans as $loan): ?>
-                            <div class="p-4 border-2 border-yellow-200 dark:border-yellow-700 rounded-lg bg-yellow-50 dark:bg-yellow-900/30">
-                                <div class="flex items-start justify-between mb-3">
-                                    <div class="flex items-start gap-4">
-                                        <div class="w-16 h-20 bg-primary/10 rounded-lg flex items-center justify-center text-primary text-3xl flex-shrink-0 border border-primary/20"><i class="ph-duotone ph-book"></i></div>
-                                        <div class="flex-1">
-                                            <h3 class="font-500 text-gray-900 dark:text-white"><?php echo htmlspecialchars(substr($loan['title'], 0, 50)); ?></h3>
-                                            <p class="text-sm text-gray-500"><?php echo htmlspecialchars($loan['author_name']); ?></p>
+                            <?php foreach ($current_loans as $loan):
+                                $cov_path = __DIR__ . '/../assets/uploads/covers/' . ($loan['cover_image'] ?? '');
+                                $has_cov   = !empty($loan['cover_image']) && file_exists($cov_path);
+                                $days_left = (strtotime($loan['due_date']) - time()) / 86400;
+                            ?>
+                            <div class="flex gap-4 p-4 border-2 <?php echo $days_left < 0 ? 'border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20' : 'border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20'; ?> rounded-xl">
+                                <!-- Cover -->
+                                <?php if ($has_cov): ?>
+                                <div class="w-12 h-16 rounded-lg overflow-hidden shrink-0 border border-gray-200 shadow-sm">
+                                    <img src="/perpustakaan/assets/uploads/covers/<?php echo htmlspecialchars($loan['cover_image']); ?>"
+                                         alt="<?php echo htmlspecialchars($loan['title']); ?>"
+                                         class="w-full h-full object-cover">
+                                </div>
+                                <?php else: ?>
+                                <div class="w-12 h-16 rounded-lg shrink-0 flex items-center justify-center font-bold text-white text-sm shadow-sm"
+                                     style="background: linear-gradient(135deg, hsl(<?php echo ($loan['book_id'] ?? $loan['id'] * 47) % 360; ?>, 60%, 55%) 0%, hsl(<?php echo ($loan['book_id'] ?? $loan['id'] * 83) % 360; ?>, 60%, 45%) 100%)">
+                                    <?php echo strtoupper(substr($loan['title'], 0, 1)); ?>
+                                </div>
+                                <?php endif; ?>
+
+                                <!-- Info -->
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-start justify-between gap-2 mb-2">
+                                        <div class="min-w-0">
+                                            <h3 class="font-semibold text-gray-900 dark:text-white truncate"><?php echo htmlspecialchars($loan['title']); ?></h3>
+                                            <p class="text-xs text-gray-500 mt-0.5"><?php echo htmlspecialchars($loan['author_name']); ?></p>
+                                        </div>
+                                        <div class="shrink-0">
+                                            <?php if ($days_left < 0): ?>
+                                            <span class="badge badge-danger flex items-center gap-1">
+                                                <i class="ph-fill ph-clock text-xs"></i> Terlambat <?php echo abs(ceil($days_left)); ?> hari
+                                            </span>
+                                            <?php elseif ($days_left < 3): ?>
+                                            <span class="badge badge-warning"><?php echo ceil($days_left); ?> hari lagi</span>
+                                            <?php else: ?>
+                                            <span class="badge badge-primary"><?php echo ceil($days_left); ?> hari lagi</span>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
-                                    <div class="text-right">
-                                        <?php
-                                        $days_left = (strtotime($loan['due_date']) - time()) / 86400;
-                                        if ($days_left < 0) {
-                                            echo '<span class="badge badge-danger flex items-center gap-1"><i class="ph-fill ph-clock"></i> Terlambat ' . abs(ceil($days_left)) . ' hari</span>';
-                                        } elseif ($days_left < 3) {
-                                            echo '<span class="badge badge-warning">' . ceil($days_left) . ' hari lagi</span>';
-                                        } else {
-                                            echo '<span class="badge badge-primary">' . ceil($days_left) . ' hari lagi</span>';
-                                        }
-                                        ?>
-                                    </div>
-                                </div>
 
-                                <div class="grid grid-cols-3 gap-4 text-sm mb-3 pt-3 border-t border-yellow-200 dark:border-yellow-700">
-                                    <div>
-                                        <p class="text-gray-500 text-xs">Tanggal Pinjam</p>
-                                        <p class="font-500"><?php echo formatDate($loan['loan_date']); ?></p>
-                                    </div>
-                                    <div>
-                                        <p class="text-gray-500 text-xs">Batas Kembali</p>
-                                        <p class="font-500 <?php echo strtotime($loan['due_date']) < time() ? 'text-red-600' : ''; ?>">
-                                            <?php echo formatDate($loan['due_date']); ?>
-                                        </p>
-                                    </div>
-                                    <div class="text-right">
-                                        <form method="POST" class="inline">
+                                    <div class="flex items-center justify-between pt-2 border-t border-amber-200 dark:border-amber-700/50">
+                                        <div class="flex gap-6 text-xs">
+                                            <div>
+                                                <p class="text-gray-400">Tanggal Pinjam</p>
+                                                <p class="font-semibold text-gray-700 dark:text-gray-300"><?php echo formatDate($loan['loan_date']); ?></p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-400">Batas Kembali</p>
+                                                <p class="font-semibold <?php echo $days_left < 0 ? 'text-red-600' : 'text-gray-700 dark:text-gray-300'; ?>"><?php echo formatDate($loan['due_date']); ?></p>
+                                            </div>
+                                        </div>
+                                        <form method="POST">
                                             <input type="hidden" name="action" value="return">
                                             <input type="hidden" name="loan_id" value="<?php echo $loan['id']; ?>">
-                                            <button type="submit" class="btn btn-sm btn-success">Kembalikan</button>
+                                            <button type="submit" class="btn btn-sm btn-success flex items-center gap-1">
+                                                <i class="ph ph-arrow-u-up-left text-sm"></i> Kembalikan
+                                            </button>
                                         </form>
                                     </div>
                                 </div>
@@ -199,13 +184,17 @@ require_once __DIR__ . '/../includes/header.php';
                             <?php endforeach; ?>
                         </div>
                         <?php else: ?>
-                        <div class="text-center py-12">
-                            <p class="text-gray-500 dark:text-gray-400 text-lg">✅ Anda tidak memiliki buku yang dipinjam</p>
+                        <div class="py-12 text-center">
+                            <div class="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto mb-3">
+                                <i class="ph ph-check-circle text-3xl text-emerald-500"></i>
+                            </div>
+                            <p class="font-semibold text-gray-700 dark:text-gray-300">Tidak ada buku yang dipinjam</p>
+                            <p class="text-sm text-gray-500 mt-1">Semua buku sudah dikembalikan.</p>
                         </div>
                         <?php endif; ?>
-                    </div>
+                </div>
 
-                    <div class="card p-6">
+                <div class="card p-6">
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Riwayat Pengembalian</h2>
 
                         <?php if (count($past_loans) > 0): ?>
@@ -246,7 +235,6 @@ require_once __DIR__ . '/../includes/header.php';
                         </div>
                         <?php endif; ?>
                     </div>
-                </div>
             </div>
 
             <?php require_once __DIR__ . '/../includes/footer.php'; ?>

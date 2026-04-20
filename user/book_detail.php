@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
     if ($action === 'add_review') {
-        $rating = (int)($_POST['rating'] ?? 0);
+        $rating  = (int)($_POST['rating'] ?? 0);
         $comment = sanitize($_POST['comment'] ?? '');
 
         if ($rating < 1 || $rating > 5) {
@@ -65,16 +65,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             try {
                 if ($user_review) {
-                    $stmt = $pdo->prepare("UPDATE reviews SET rating = ?, comment = ? WHERE book_id = ? AND user_id = ?");
+                    // Edit: reset to pending so admin re-moderates
+                    $stmt = $pdo->prepare("UPDATE reviews SET rating = ?, comment = ?, status = 'pending', updated_at = NOW() WHERE book_id = ? AND user_id = ?");
                     $stmt->execute([$rating, $comment, $book_id, $_SESSION['user_id']]);
-                    $message = 'Review berhasil diperbarui!';
+                    $message = 'Ulasan diperbarui dan menunggu persetujuan admin.';
                 } else {
-                    $stmt = $pdo->prepare("INSERT INTO reviews (book_id, user_id, rating, comment) VALUES (?, ?, ?, ?)");
+                    $stmt = $pdo->prepare("INSERT INTO reviews (book_id, user_id, rating, comment, status) VALUES (?, ?, ?, ?, 'pending')");
                     $stmt->execute([$book_id, $_SESSION['user_id'], $rating, $comment]);
-                    $message = 'Review berhasil ditambahkan!';
+                    $message = 'Ulasan berhasil dikirim! Menunggu persetujuan admin.';
                 }
-                
-                header("Refresh: 1");
+                // Refresh user_review data after save
+                $stmt = $pdo->prepare("SELECT * FROM reviews WHERE book_id = ? AND user_id = ?");
+                $stmt->execute([$book_id, $_SESSION['user_id']]);
+                $user_review = $stmt->fetch();
             } catch (PDOException $e) {
                 $error = 'Error: ' . $e->getMessage();
             }
@@ -215,41 +218,94 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
                 <?php endif; ?>
 
-                <div class="mb-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <h3 class="font-bold text-gray-900 dark:text-white mb-4">
-                        <?php echo $user_review ? 'Update Ulasan Anda' : 'Tulis Ulasan'; ?>
+                <?php
+                $review_status = $user_review['status'] ?? null;
+                $can_edit      = !$user_review || in_array($review_status, ['approved', 'rejected']);
+                $is_pending    = $user_review && $review_status === 'pending';
+                ?>
+
+                <?php if ($is_pending): ?>
+                <!-- Pending state: read-only card -->
+                <div class="mb-8 p-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-xl">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-800/40 flex items-center justify-center shrink-0">
+                            <i class="ph ph-hourglass text-xl text-amber-600 dark:text-amber-400"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-bold text-amber-800 dark:text-amber-300 mb-1">Ulasan Menunggu Persetujuan</h3>
+                            <p class="text-sm text-amber-700 dark:text-amber-400 mb-4">Ulasan Anda sedang ditinjau oleh admin dan akan segera dipublikasikan.</p>
+
+                            <!-- Read-only preview of their review -->
+                            <div class="bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-700/40 rounded-xl p-4">
+                                <div class="flex items-center gap-0.5 mb-2">
+                                    <?php echo generateStars((int)$user_review['rating']); ?>
+                                    <span class="text-xs text-gray-500 ml-2"><?php echo $user_review['rating']; ?>/5</span>
+                                </div>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 italic"><?php echo nl2br(htmlspecialchars($user_review['comment'])); ?></p>
+                            </div>
+
+                            <p class="text-xs text-amber-600 dark:text-amber-500 mt-3">
+                                <i class="ph ph-clock mr-1"></i>
+                                Dikirim <?php echo timeAgo($user_review['created_at']); ?> · Tidak dapat diedit saat menunggu persetujuan
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <?php else: ?>
+                <!-- Form: new review or edit after approved/rejected -->
+                <div class="mb-8 p-6 bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 rounded-xl">
+                    <?php if ($user_review && $review_status === 'rejected'): ?>
+                    <div class="flex items-center gap-2 mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/40 rounded-lg">
+                        <i class="ph ph-x-circle text-red-500 text-lg"></i>
+                        <p class="text-sm text-red-700 dark:text-red-400">Ulasan Anda sebelumnya ditolak. Silakan perbaiki dan kirim ulang.</p>
+                    </div>
+                    <?php elseif ($user_review && $review_status === 'approved'): ?>
+                    <div class="flex items-center gap-2 mb-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700/40 rounded-lg">
+                        <i class="ph ph-check-circle text-emerald-500 text-lg"></i>
+                        <p class="text-sm text-emerald-700 dark:text-emerald-400">Ulasan Anda telah disetujui. Edit di bawah jika ingin memperbarui (akan ditinjau ulang).</p>
+                    </div>
+                    <?php endif; ?>
+
+                    <h3 class="font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                        <i class="ph ph-pencil-simple text-primary"></i>
+                        <?php echo $user_review ? 'Edit Ulasan Anda' : 'Tulis Ulasan'; ?>
                     </h3>
 
                     <form method="POST">
                         <input type="hidden" name="action" value="add_review">
 
                         <div class="form-group mb-4">
-                            <label class="block text-gray-900 dark:text-white font-500 mb-2">Rating</label>
-                            <div class="flex gap-2" id="ratingStars">
+                            <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2 text-sm">Rating</label>
+                            <div class="flex gap-1" id="ratingStars">
                                 <?php for ($i = 1; $i <= 5; $i++): ?>
                                 <label class="cursor-pointer">
-                                    <input type="radio" name="rating" value="<?php echo $i; ?>" 
-                                        <?php echo ($user_review && $user_review['rating'] == $i) ? 'checked' : ''; ?> 
+                                    <input type="radio" name="rating" value="<?php echo $i; ?>"
+                                        <?php echo ($user_review && $user_review['rating'] == $i) ? 'checked' : ''; ?>
                                         style="display:none">
-                                    <span class="text-4xl transition hover:scale-125" 
-                                        style="display:inline-block;" 
-                                        data-rating="<?php echo $i; ?>">★</span>
+                                    <span class="text-4xl transition hover:scale-125"
+                                          style="display:inline-block;"
+                                          data-rating="<?php echo $i; ?>">★</span>
                                 </label>
                                 <?php endfor; ?>
                             </div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Klik bintang untuk memberi rating (1-5)</p>
+                            <p class="text-xs text-gray-400 mt-1">Klik bintang untuk memberi rating (1–5)</p>
                         </div>
 
-                        <div class="form-group mb-4">
-                            <label class="block text-gray-900 dark:text-white font-500 mb-2">Komentar</label>
-                            <textarea name="comment" style="height: 100px;" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"><?php echo $user_review ? htmlspecialchars($user_review['comment']) : ''; ?></textarea>
+                        <div class="form-group mb-5">
+                            <label class="block text-gray-700 dark:text-gray-300 font-semibold mb-2 text-sm">Komentar</label>
+                            <textarea name="comment" placeholder="Tulis pendapat Anda tentang buku ini..."
+                                      style="height:100px;" class="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-white dark:bg-gray-900 text-gray-900 dark:text-white resize-none transition"
+                            ><?php echo $user_review ? htmlspecialchars($user_review['comment']) : ''; ?></textarea>
                         </div>
 
-                        <button type="submit" class="btn btn-primary">
-                            <?php echo $user_review ? '✏️ Perbarui Ulasan' : '📝 Kirim Ulasan'; ?>
+                        <button type="submit" class="btn btn-primary flex items-center gap-2">
+                            <i class="ph ph-paper-plane-tilt text-lg"></i>
+                            <?php echo $user_review ? 'Perbarui & Kirim Ulang' : 'Kirim Ulasan'; ?>
                         </button>
                     </form>
                 </div>
+                <?php endif; ?>
 
                 <div class="space-y-4">
                     <?php if (count($reviews) > 0): ?>

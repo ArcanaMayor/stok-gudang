@@ -54,8 +54,8 @@ require_once __DIR__ . '/includes/header.php';
 
     <section class="bg-primary/5 py-24 border-b border-gray-200 dark:border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 class="text-5xl md:text-6xl font-extrabold mb-6 text-gray-900 dark:text-white tracking-tight">Perpustakaan <span class="text-primary">Masa Depan</span></h1>
-            <p class="text-xl text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto">Jelajahi koleksi buku terlengkap dan kelola peminjaman dengan mudah melalui platform perpustakaan modern kami.</p>
+            <h1 class="text-5xl md:text-6xl font-extrabold mb-6 text-gray-900 dark:text-white tracking-tight">Perpustakaan <span class="text-primary">UKK 26</span></h1>
+            <p class="text-xl text-gray-600 dark:text-gray-400 mb-10 max-w-2xl mx-auto">Jelajahi koleksi buku dan kelola peminjaman dengan mudah melalui platform Perpustakaan UKK 26</p>
             
             <div class="flex gap-4 justify-center">
                 <?php if (!isLoggedIn()): ?>
@@ -104,15 +104,20 @@ require_once __DIR__ . '/includes/header.php';
             <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-12 text-center">Kategori Buku</h2>
             
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-                <?php foreach ($categories as $index => $cat): 
-                    $icons = ['ph-book-bookmark', 'ph-desktop', 'ph-flask', 'ph-palette', 'ph-globe-hemisphere-west', 'ph-calculator'];
-                    $icon = $icons[$index % count($icons)];
+                <?php foreach ($categories as $index => $cat):
+                    // Use icon from DB if it's a Phosphor class, otherwise fallback
+                    $cat_icon = !empty($cat['icon']) && str_starts_with($cat['icon'], 'ph-')
+                        ? $cat['icon']
+                        : 'ph-books';
                 ?>
                 <a href="/perpustakaan/user/books.php?category=<?php echo $cat['id']; ?>" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6 rounded-2xl text-center hover:border-primary hover:shadow-md transition group">
                     <div class="w-16 h-16 mx-auto bg-gray-50 dark:bg-gray-700 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-4">
-                        <i class="ph-duotone <?php echo $icon; ?> text-3xl"></i>
+                        <i class="ph-duotone <?php echo htmlspecialchars($cat_icon); ?> text-3xl"></i>
                     </div>
                     <p class="font-semibold text-gray-900 dark:text-white group-hover:text-primary transition-colors"><?php echo htmlspecialchars($cat['name']); ?></p>
+                    <?php if (!empty($cat['description'])): ?>
+                    <p class="text-xs text-gray-400 mt-1 line-clamp-1"><?php echo htmlspecialchars(substr($cat['description'], 0, 40)); ?></p>
+                    <?php endif; ?>
                 </a>
                 <?php endforeach; ?>
             </div>
@@ -130,11 +135,23 @@ require_once __DIR__ . '/includes/header.php';
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <?php foreach ($featured_books as $book): ?>
+                <?php foreach ($featured_books as $book):
+                    $cover_path = __DIR__ . '/assets/uploads/covers/' . ($book['cover_image'] ?? '');
+                    $has_cover  = !empty($book['cover_image']) && file_exists($cover_path);
+                ?>
                 <div class="book-card border border-gray-200 dark:border-gray-700 hover:border-primary transition group">
-                    <div class="book-card-image bg-gray-50 dark:bg-gray-800 flex items-center justify-center group-hover:bg-primary/5 transition-colors border-b border-gray-200 dark:border-gray-700">
-                        <i class="ph-duotone ph-book-open text-6xl text-gray-300 dark:text-gray-600 group-hover:text-primary transition-colors"></i>
+                    <?php if ($has_cover): ?>
+                    <div class="book-card-image p-0 overflow-hidden">
+                        <img src="/perpustakaan/assets/uploads/covers/<?php echo htmlspecialchars($book['cover_image']); ?>"
+                             alt="<?php echo htmlspecialchars($book['title']); ?>"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                     </div>
+                    <?php else: ?>
+                    <div class="book-card-image flex items-center justify-center group-hover:bg-primary/5 transition-colors border-b border-gray-200 dark:border-gray-700"
+                         style="background: linear-gradient(135deg, hsl(<?php echo ($book['id'] * 47) % 360; ?>, 60%, 92%) 0%, hsl(<?php echo ($book['id'] * 83) % 360; ?>, 60%, 88%) 100%);">
+                        <i class="ph-duotone ph-book-open text-6xl group-hover:text-primary transition-colors" style="color: hsl(<?php echo ($book['id'] * 47) % 360; ?>, 50%, 55%);"></i>
+                    </div>
+                    <?php endif; ?>
                     <div class="book-card-body">
                         <h3 class="book-card-title"><?php echo htmlspecialchars($book['title']); ?></h3>
                         <p class="book-card-author">oleh <?php echo htmlspecialchars(substr($book['author_name'], 0, 30)); ?></p>
@@ -234,7 +251,7 @@ require_once __DIR__ . '/includes/header.php';
         
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
             <h2 class="text-4xl md:text-5xl font-bold mb-6 text-white tracking-tight">Siap Mulai Perjalanan Membaca?</h2>
-            <p class="text-xl text-gray-300 mb-10 max-w-2xl mx-auto">Bergabunglah dengan ribuan pembaca yang telah menikmati sistem perpustakaan modern, cepat, dan mudah.</p>
+            <p class="text-xl text-gray-300 mb-10 max-w-2xl mx-auto">Bergabunglah agar menjadi insan yang berguna bagi bangsa dan negara dengan membaca.</p>
             
             <?php if (!isLoggedIn()): ?>
             <div class="flex gap-4 justify-center">

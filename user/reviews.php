@@ -245,10 +245,28 @@ require_once __DIR__ . '/../includes/header.php';
                                     </span>
 
                                     <div class="flex items-center gap-2">
+                                        <?php if ($review['status'] === 'pending'): ?>
+                                        <!-- Pending: locked, cannot edit -->
+                                        <span class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-amber-600 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 rounded-lg cursor-not-allowed"
+                                              title="Tidak dapat diedit saat menunggu persetujuan">
+                                            <i class="ph ph-lock text-sm"></i> Terkunci
+                                        </span>
+
+                                        <?php elseif ($review['status'] === 'rejected'): ?>
+                                        <!-- Rejected: allow edit -->
+                                        <a href="/perpustakaan/user/book_detail.php?id=<?php echo $review['book_id']; ?>#review"
+                                           class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 dark:border-red-700/40 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                           title="Perbaiki dan kirim ulang">
+                                            <i class="ph ph-pencil-simple text-sm"></i> Perbaiki
+                                        </a>
+
+                                        <?php else: ?>
+                                        <!-- Approved: allow edit -->
                                         <a href="/perpustakaan/user/book_detail.php?id=<?php echo $review['book_id']; ?>#review"
                                            class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary/5 transition-colors">
                                             <i class="ph ph-pencil-simple text-sm"></i> Edit
                                         </a>
+                                        <?php endif; ?>
 
                                         <form method="POST" class="inline">
                                             <input type="hidden" name="action" value="delete">
@@ -264,13 +282,13 @@ require_once __DIR__ . '/../includes/header.php';
 
                                 <?php if ($review['status'] === 'pending'): ?>
                                 <div class="mt-3 p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800/30 rounded-lg text-xs text-amber-700 dark:text-amber-400 flex items-start gap-2">
-                                    <i class="ph ph-info text-sm shrink-0 mt-0.5"></i>
-                                    Review Anda sedang menunggu persetujuan admin. Setelah disetujui, ulasan akan tampil di halaman buku.
+                                    <i class="ph ph-hourglass text-sm shrink-0 mt-0.5"></i>
+                                    Ulasan sedang ditinjau admin. Tidak dapat diedit sampai mendapat keputusan.
                                 </div>
                                 <?php elseif ($review['status'] === 'rejected'): ?>
                                 <div class="mt-3 p-3 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-800/30 rounded-lg text-xs text-red-600 dark:text-red-400 flex items-start gap-2">
                                     <i class="ph ph-warning text-sm shrink-0 mt-0.5"></i>
-                                    Review ini telah ditolak oleh admin. Anda dapat mengedit dan mengirim ulang.
+                                    Ulasan ditolak oleh admin. Klik <strong>Perbaiki</strong> untuk mengedit dan mengirim ulang.
                                 </div>
                                 <?php endif; ?>
                             </div>

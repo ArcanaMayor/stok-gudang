@@ -165,18 +165,33 @@ require_once __DIR__ . '/../includes/header.php';
 
                     <div class="space-y-4">
                         <?php foreach ($recent_loans as $loan): ?>
-                        <div class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 bg-primary/10 text-primary rounded-lg flex items-center justify-center font-bold text-sm shrink-0">
+                        <?php
+                        $cl_path = __DIR__ . '/../assets/uploads/covers/' . ($loan['cover_image'] ?? '');
+                        $cl_has  = !empty($loan['cover_image']) && file_exists($cl_path);
+                        ?>
+                        <div class="flex items-center justify-between p-4 border border-gray-100 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                            <div class="flex items-center gap-3">
+                                <?php if ($cl_has): ?>
+                                <div class="w-10 h-14 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 shrink-0 shadow-sm">
+                                    <img src="/perpustakaan/assets/uploads/covers/<?php echo htmlspecialchars($loan['cover_image']); ?>"
+                                         alt="<?php echo htmlspecialchars($loan['title']); ?>"
+                                         class="w-full h-full object-cover">
+                                </div>
+                                <?php else: ?>
+                                <div class="w-10 h-14 rounded-lg shrink-0 flex items-center justify-center font-bold text-sm text-white shadow-sm"
+                                     style="background: linear-gradient(135deg, hsl(<?php echo ($loan['book_id'] ?? $loan['id'] * 47) % 360; ?>, 65%, 55%) 0%, hsl(<?php echo ($loan['book_id'] ?? $loan['id'] * 83) % 360; ?>, 65%, 45%) 100%)">
                                     <?php echo strtoupper(substr($loan['title'], 0, 1)); ?>
                                 </div>
+                                <?php endif; ?>
                                 <div>
-                                    <p class="font-500 text-gray-900 dark:text-white text-sm"><?php echo htmlspecialchars(substr($loan['title'], 0, 30)); ?></p>
-                                    <p class="text-xs text-gray-500"><?php echo htmlspecialchars($loan['full_name']); ?></p>
+                                    <p class="font-500 text-gray-900 dark:text-white text-sm"><?php echo htmlspecialchars(substr($loan['title'], 0, 28)); ?></p>
+                                    <p class="text-xs text-gray-500 mt-0.5"><?php echo htmlspecialchars($loan['full_name']); ?></p>
                                 </div>
                             </div>
-                            <div class="text-right">
-                                <span class="badge badge-primary"><?php echo $loan['status'] === 'borrowed' ? 'Dipinjam' : 'Dikembalikan'; ?></span>
+                            <div class="text-right shrink-0">
+                                <span class="badge <?php echo $loan['status'] === 'borrowed' ? 'badge-primary' : 'badge-success'; ?>">
+                                    <?php echo $loan['status'] === 'borrowed' ? 'Dipinjam' : 'Dikembalikan'; ?>
+                                </span>
                                 <p class="text-xs text-gray-500 mt-1"><?php echo formatDate($loan['due_date']); ?></p>
                             </div>
                         </div>
@@ -193,17 +208,30 @@ require_once __DIR__ . '/../includes/header.php';
 
                     <div class="space-y-4">
                         <?php foreach ($popular_books as $book): ?>
-                        <div class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 bg-primary/10 text-primary rounded-lg flex items-center justify-center font-bold text-sm shrink-0">
+                        <?php
+                        $bp_path = __DIR__ . '/../assets/uploads/covers/' . ($book['cover_image'] ?? '');
+                        $bp_has  = !empty($book['cover_image']) && file_exists($bp_path);
+                        ?>
+                        <div class="flex items-center justify-between p-3 border border-gray-100 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition group">
+                            <div class="flex items-center gap-3">
+                                <?php if ($bp_has): ?>
+                                <div class="w-10 h-14 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 shrink-0 shadow-sm">
+                                    <img src="/perpustakaan/assets/uploads/covers/<?php echo htmlspecialchars($book['cover_image']); ?>"
+                                         alt="<?php echo htmlspecialchars($book['title']); ?>"
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                </div>
+                                <?php else: ?>
+                                <div class="w-10 h-14 rounded-lg shrink-0 flex items-center justify-center font-bold text-sm text-white shadow-sm"
+                                     style="background: linear-gradient(135deg, hsl(<?php echo ($book['id'] * 47) % 360; ?>, 65%, 55%) 0%, hsl(<?php echo ($book['id'] * 83) % 360; ?>, 65%, 45%) 100%)">
                                     <?php echo strtoupper(substr($book['title'], 0, 1)); ?>
                                 </div>
+                                <?php endif; ?>
                                 <div>
-                                    <p class="font-500 text-gray-900 dark:text-white text-sm"><?php echo htmlspecialchars($book['title']); ?></p>
-                                    <p class="text-xs text-gray-500"><?php echo htmlspecialchars($book['author_name']); ?></p>
+                                    <p class="font-500 text-gray-900 dark:text-white text-sm"><?php echo htmlspecialchars(substr($book['title'], 0, 28)); ?></p>
+                                    <p class="text-xs text-gray-500 mt-0.5"><?php echo htmlspecialchars($book['author_name']); ?></p>
                                 </div>
                             </div>
-                            <div class="text-right">
+                            <div class="text-right shrink-0">
                                 <span class="font-bold text-lg text-blue-600"><?php echo $book['loan_count']; ?></span>
                                 <p class="text-xs text-gray-500">peminjaman</p>
                             </div>

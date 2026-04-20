@@ -256,41 +256,62 @@ document.addEventListener('DOMContentLoaded', function() {
 
                         <?php if (count($current_loans) > 0): ?>
                         <div class="space-y-4">
-                            <?php foreach ($current_loans as $loan): ?>
-                            <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                                <div class="flex items-start justify-between mb-3">
-                                    <div class="flex items-start gap-4">
-                                        <div class="w-16 h-20 bg-primary/10 rounded-lg flex items-center justify-center text-primary text-3xl flex-shrink-0 border border-primary/20"><i class="ph-duotone ph-book"></i></div>
-                                        <div class="flex-1">
-                                            <h3 class="font-500 text-gray-900 dark:text-white"><?php echo htmlspecialchars(substr($loan['title'], 0, 50)); ?></h3>
-                                            <p class="text-sm text-gray-500"><?php echo htmlspecialchars($loan['author_name']); ?></p>
+                            <?php foreach ($current_loans as $loan):
+                                $cov_path = __DIR__ . '/../assets/uploads/covers/' . ($loan['cover_image'] ?? '');
+                                $has_cov   = !empty($loan['cover_image']) && file_exists($cov_path);
+                                $days_left = (strtotime($loan['due_date']) - time()) / 86400;
+                            ?>
+                            <div class="flex gap-4 p-4 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition">
+                                <!-- Cover -->
+                                <?php if ($has_cov): ?>
+                                <div class="w-12 h-16 rounded-lg overflow-hidden shrink-0 border border-gray-200 dark:border-gray-600 shadow-sm">
+                                    <img src="/perpustakaan/assets/uploads/covers/<?php echo htmlspecialchars($loan['cover_image']); ?>"
+                                         alt="<?php echo htmlspecialchars($loan['title']); ?>"
+                                         class="w-full h-full object-cover">
+                                </div>
+                                <?php else: ?>
+                                <div class="w-12 h-16 rounded-lg shrink-0 flex items-center justify-center font-bold text-white text-sm shadow-sm"
+                                     style="background: linear-gradient(135deg, hsl(<?php echo ($loan['book_id'] * 47) % 360; ?>, 60%, 55%) 0%, hsl(<?php echo ($loan['book_id'] * 83) % 360; ?>, 60%, 45%) 100%)">
+                                    <?php echo strtoupper(substr($loan['title'], 0, 1)); ?>
+                                </div>
+                                <?php endif; ?>
+
+                                <!-- Info -->
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-start justify-between gap-2 mb-2">
+                                        <div class="min-w-0">
+                                            <h3 class="font-semibold text-gray-900 dark:text-white truncate"><?php echo htmlspecialchars($loan['title']); ?></h3>
+                                            <p class="text-xs text-gray-500 mt-0.5"><?php echo htmlspecialchars($loan['author_name']); ?></p>
+                                        </div>
+                                        <div class="shrink-0">
+                                            <?php if ($days_left < 0): ?>
+                                            <span class="badge badge-danger flex items-center gap-1">
+                                                <i class="ph-fill ph-clock text-xs"></i> Terlambat <?php echo abs(ceil($days_left)); ?> hari
+                                            </span>
+                                            <?php elseif ($days_left < 3): ?>
+                                            <span class="badge badge-warning flex items-center gap-1">
+                                                <i class="ph-fill ph-clock text-xs"></i> <?php echo ceil($days_left); ?> hari
+                                            </span>
+                                            <?php else: ?>
+                                            <span class="badge badge-primary"><?php echo ceil($days_left); ?> hari</span>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
-                                    <div class="text-right">
-                                        <?php
-                                        $days_left = (strtotime($loan['due_date']) - time()) / 86400;
-                                        if ($days_left < 0) {
-                                            echo '<span class="badge badge-danger">Terlambat</span>';
-                                        } elseif ($days_left < 3) {
-                                            echo '<span class="badge badge-warning flex items-center gap-1"><i class="ph-fill ph-clock"></i> ' . ceil($days_left) . ' hari</span>';
-                                        } else {
-                                            echo '<span class="badge badge-primary">' . ceil($days_left) . ' hari</span>';
-                                        }
-                                        ?>
-                                    </div>
-                                </div>
 
-                                <div class="grid grid-cols-3 gap-4 text-sm mb-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                                    <div>
-                                        <p class="text-gray-500 text-xs">Tanggal Pinjam</p>
-                                        <p class="font-500"><?php echo formatDate($loan['loan_date']); ?></p>
-                                    </div>
-                                    <div>
-                                        <p class="text-gray-500 text-xs">Batas Kembali</p>
-                                        <p class="font-500"><?php echo formatDate($loan['due_date']); ?></p>
-                                    </div>
-                                    <div class="text-right">
-                                        <a href="/perpustakaan/user/return.php?id=<?php echo $loan['id']; ?>" class="text-blue-600 hover:underline text-sm font-500">Kembalikan →</a>
+                                    <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
+                                        <div class="flex gap-6 text-xs">
+                                            <div>
+                                                <p class="text-gray-400">Tanggal Pinjam</p>
+                                                <p class="font-semibold text-gray-700 dark:text-gray-300"><?php echo formatDate($loan['loan_date']); ?></p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-400">Batas Kembali</p>
+                                                <p class="font-semibold <?php echo $days_left < 0 ? 'text-red-600' : 'text-gray-700 dark:text-gray-300'; ?>"><?php echo formatDate($loan['due_date']); ?></p>
+                                            </div>
+                                        </div>
+                                        <a href="/perpustakaan/user/return.php" class="flex items-center gap-1 text-xs font-medium text-primary hover:underline">
+                                            Kembalikan <i class="ph ph-arrow-right text-sm"></i>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
