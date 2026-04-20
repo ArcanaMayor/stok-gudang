@@ -155,25 +155,38 @@ require_once __DIR__ . '/../includes/header.php';
                     <div class="space-y-4">
                         <?php if (count($active_borrows) > 0): ?>
                             <?php foreach ($active_borrows as $loan): ?>
-                            <div class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 bg-primary/10 text-primary rounded-lg flex items-center justify-center font-bold text-sm">
+                            <?php
+                            $cover_path_l = __DIR__ . '/../assets/uploads/covers/' . ($loan['cover_image'] ?? '');
+                            $has_cover_l  = !empty($loan['cover_image']) && file_exists($cover_path_l);
+                            $days_left    = (strtotime($loan['due_date']) - time()) / 86400;
+                            ?>
+                            <div class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                                <div class="flex items-center gap-3">
+                                    <?php if ($has_cover_l): ?>
+                                    <div class="w-10 h-14 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 shrink-0 shadow-sm">
+                                        <img src="/perpustakaan/assets/uploads/covers/<?php echo htmlspecialchars($loan['cover_image']); ?>"
+                                             alt="<?php echo htmlspecialchars($loan['title']); ?>"
+                                             class="w-full h-full object-cover">
+                                    </div>
+                                    <?php else: ?>
+                                    <div class="w-10 h-14 rounded-lg shrink-0 flex items-center justify-center font-bold text-sm text-white shadow-sm"
+                                         style="background: linear-gradient(135deg, hsl(<?php echo (crc32($loan['title']) % 360 + 360) % 360; ?>, 65%, 55%) 0%, hsl(<?php echo ((crc32($loan['title']) + 120) % 360 + 360) % 360; ?>, 65%, 45%) 100%)">
                                         <?php echo strtoupper(substr($loan['title'], 0, 1)); ?>
                                     </div>
+                                    <?php endif; ?>
                                     <div>
-                                        <p class="font-500 text-gray-900 dark:text-white text-sm"><?php echo htmlspecialchars(substr($loan['title'], 0, 30)); ?></p>
-                                        <p class="text-xs text-gray-500"><?php echo htmlspecialchars($loan['author_name']); ?></p>
+                                        <p class="font-500 text-gray-900 dark:text-white text-sm"><?php echo htmlspecialchars(substr($loan['title'], 0, 28)); ?></p>
+                                        <p class="text-xs text-gray-500 mt-0.5"><?php echo htmlspecialchars($loan['author_name']); ?></p>
                                     </div>
                                 </div>
-                                <div class="text-right">
-                                    <?php
-                                    $days_left = (strtotime($loan['due_date']) - time()) / 86400;
-                                    if ($days_left < 3) {
-                                        echo '<span class="badge badge-danger flex items-center gap-1 w-max"><i class="ph-fill ph-clock"></i> ' . ceil($days_left) . ' hari</span>';
-                                    } else {
-                                        echo '<span class="badge badge-primary">' . ceil($days_left) . ' hari</span>';
-                                    }
-                                    ?>
+                                <div class="text-right shrink-0">
+                                    <?php if ($days_left < 3): ?>
+                                    <span class="badge badge-danger flex items-center gap-1">
+                                        <i class="ph-fill ph-clock text-xs"></i> <?php echo max(0, ceil($days_left)); ?> hari
+                                    </span>
+                                    <?php else: ?>
+                                    <span class="badge badge-primary"><?php echo ceil($days_left); ?> hari</span>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                             <?php endforeach; ?>
@@ -195,19 +208,28 @@ require_once __DIR__ . '/../includes/header.php';
                     <div class="space-y-4">
                         <?php if (count($recommended_books) > 0): ?>
                             <?php foreach ($recommended_books as $book): ?>
-                            <a href="/perpustakaan/user/book_detail.php?id=<?php echo $book['id']; ?>" class="block p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 bg-primary/10 text-primary rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0">
-                                        <?php echo strtoupper(substr($book['title'], 0, 1)); ?>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="font-500 text-gray-900 dark:text-white text-sm truncate"><?php echo htmlspecialchars($book['title']); ?></p>
-                                        <div class="flex items-center justify-between mt-1">
-                                            <p class="text-xs text-gray-500 truncate"><?php echo htmlspecialchars($book['author_name']); ?></p>
-                                            <span class="badge badge-success text-xs">Tersedia</span>
-                                        </div>
-                                    </div>
+                            <?php
+                            $cover_path_b = __DIR__ . '/../assets/uploads/covers/' . ($book['cover_image'] ?? '');
+                            $has_cover_b  = !empty($book['cover_image']) && file_exists($cover_path_b);
+                            ?>
+                            <a href="/perpustakaan/user/book_detail.php?id=<?php echo $book['id']; ?>" class="flex items-center gap-3 p-3 border border-gray-100 dark:border-gray-700 rounded-xl hover:border-primary/40 hover:bg-primary/5 transition-all group">
+                                <?php if ($has_cover_b): ?>
+                                <div class="w-10 h-14 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 shrink-0 shadow-sm">
+                                    <img src="/perpustakaan/assets/uploads/covers/<?php echo htmlspecialchars($book['cover_image']); ?>"
+                                         alt="<?php echo htmlspecialchars($book['title']); ?>"
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                                 </div>
+                                <?php else: ?>
+                                <div class="w-10 h-14 rounded-lg shrink-0 flex items-center justify-center font-bold text-sm text-white shadow-sm"
+                                     style="background: linear-gradient(135deg, hsl(<?php echo ($book['id'] * 47) % 360; ?>, 65%, 55%) 0%, hsl(<?php echo ($book['id'] * 83) % 360; ?>, 65%, 45%) 100%)">
+                                    <?php echo strtoupper(substr($book['title'], 0, 1)); ?>
+                                </div>
+                                <?php endif; ?>
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-semibold text-gray-900 dark:text-white text-sm truncate group-hover:text-primary transition-colors"><?php echo htmlspecialchars($book['title']); ?></p>
+                                    <p class="text-xs text-gray-500 mt-0.5 truncate"><?php echo htmlspecialchars($book['author_name']); ?></p>
+                                </div>
+                                <span class="badge badge-success text-xs shrink-0">Tersedia</span>
                             </a>
                             <?php endforeach; ?>
                         <?php else: ?>

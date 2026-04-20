@@ -106,7 +106,19 @@ require_once __DIR__ . '/../includes/header.php';
             <div class="card p-8 mb-8">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div class="flex flex-col items-center justify-center">
+                        <?php
+                        $cover_path = __DIR__ . '/../assets/uploads/covers/' . ($book['cover_image'] ?? '');
+                        $has_cover  = !empty($book['cover_image']) && file_exists($cover_path);
+                        ?>
+                        <?php if ($has_cover): ?>
+                        <div class="w-full aspect-[3/4] rounded-2xl overflow-hidden mb-6 border border-gray-200 dark:border-gray-700 shadow-md">
+                            <img src="/perpustakaan/assets/uploads/covers/<?php echo htmlspecialchars($book['cover_image']); ?>"
+                                 alt="<?php echo htmlspecialchars($book['title']); ?>"
+                                 class="w-full h-full object-cover">
+                        </div>
+                        <?php else: ?>
                         <div class="w-full aspect-[3/4] bg-primary/10 rounded-2xl flex items-center justify-center text-primary text-8xl mb-6 border border-primary/20"><i class="ph-duotone ph-book"></i></div>
+                        <?php endif; ?>
                         <?php if ($book['available_stock'] > 0): ?>
                         <a href="/perpustakaan/user/borrow.php?book_id=<?php echo $book['id']; ?>" class="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2">
                             <i class="ph ph-tray-arrow-down text-xl"></i> Pinjam Buku
@@ -242,13 +254,22 @@ require_once __DIR__ . '/../includes/header.php';
                 <div class="space-y-4">
                     <?php if (count($reviews) > 0): ?>
                         <?php foreach ($reviews as $review): ?>
-                        <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                            <div class="flex items-center justify-between mb-2">
-                                <p class="font-500 text-gray-900 dark:text-white"><?php echo htmlspecialchars($review['full_name']); ?></p>
-                                <span class="text-yellow-500"><?php echo str_repeat('★', $review['rating']); ?></span>
+                        <div class="p-5 border border-gray-100 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800/40 transition-colors">
+                            <div class="flex items-start justify-between gap-4 mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">
+                                        <?php echo strtoupper(substr($review['full_name'], 0, 1)); ?>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900 dark:text-white text-sm"><?php echo htmlspecialchars($review['full_name']); ?></p>
+                                        <p class="text-xs text-gray-500"><?php echo timeAgo($review['created_at']); ?></p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-0.5 shrink-0">
+                                    <?php echo generateStars((int)$review['rating']); ?>
+                                </div>
                             </div>
-                            <p class="text-gray-600 dark:text-gray-400 text-sm mb-2"><?php echo htmlspecialchars($review['comment']); ?></p>
-                            <p class="text-xs text-gray-500"><?php echo timeAgo($review['created_at']); ?></p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed pl-12"><?php echo nl2br(htmlspecialchars($review['comment'])); ?></p>
                         </div>
                         <?php endforeach; ?>
                     <?php else: ?>

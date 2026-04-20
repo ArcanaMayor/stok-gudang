@@ -10,7 +10,9 @@ try {
     $total_loans = $pdo->query("SELECT COUNT(*) as count FROM loans")->fetch()['count'];
     $categories = $pdo->query("SELECT * FROM categories LIMIT 6")->fetchAll();
     $featured_books = $pdo->query("
-        SELECT b.*, a.name as author_name
+        SELECT b.*, a.name as author_name,
+               COALESCE((SELECT AVG(r.rating) FROM reviews r WHERE r.book_id = b.id AND r.status = 'approved'), 0) as avg_rating,
+               COALESCE((SELECT COUNT(r.id)  FROM reviews r WHERE r.book_id = b.id AND r.status = 'approved'), 0) as review_count
         FROM books b
         JOIN authors a ON b.author_id = a.id
         ORDER BY b.created_at DESC
@@ -137,7 +139,12 @@ require_once __DIR__ . '/includes/header.php';
                         <h3 class="book-card-title"><?php echo htmlspecialchars($book['title']); ?></h3>
                         <p class="book-card-author">oleh <?php echo htmlspecialchars(substr($book['author_name'], 0, 30)); ?></p>
                         <div class="flex items-center justify-between mt-3">
-                            <span class="book-card-rating">★★★★☆</span>
+                            <span class="book-card-rating flex items-center gap-0.5">
+                                <?php echo generateStars((float)$book['avg_rating']); ?>
+                                <?php if ($book['review_count'] > 0): ?>
+                                <span class="text-xs text-gray-500 ml-1">(<?php echo $book['review_count']; ?>)</span>
+                                <?php endif; ?>
+                            </span>
                             <?php if ($book['available_stock'] > 0): ?>
                                 <span class="badge badge-success">Tersedia</span>
                             <?php else: ?>

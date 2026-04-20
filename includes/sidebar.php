@@ -50,6 +50,18 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <span>Pengguna</span>
         </a>
 
+        <div class="sidebar-section-title">KONTEN</div>
+        <a href="/perpustakaan/admin/reviews.php" class="sidebar-link <?php echo $current_page === 'reviews.php' ? 'active' : ''; ?>">
+            <i class="ph ph-star text-xl"></i>
+            <span>Review</span>
+            <?php
+            try {
+                $pending_reviews = $pdo->query("SELECT COUNT(*) FROM reviews WHERE status = 'pending'")->fetchColumn();
+                if ($pending_reviews > 0) echo '<span class="ml-auto text-xs bg-amber-500 text-white font-bold px-2 py-0.5 rounded-full">' . $pending_reviews . '</span>';
+            } catch (Exception $e) {}
+            ?>
+        </a>
+
 
     </nav>
 

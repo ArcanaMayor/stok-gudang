@@ -8,26 +8,22 @@ $page_title = 'Dashboard';
 
 // Get Statistics
 $stats = [
-    'total_books' => 0,
-    'total_users' => 0,
-    'total_loans' => 0,
-    'overdue_loans' => 0
+    'total_books'   => 0,
+    'total_users'   => 0,
+    'total_loans'   => 0,
+    'overdue_loans' => 0,
 ];
 
 try {
-    // Total Books
     $stmt = $pdo->query("SELECT COUNT(*) as count FROM books");
     $stats['total_books'] = $stmt->fetch()['count'];
 
-    // Total Users
     $stmt = $pdo->query("SELECT COUNT(*) as count FROM users WHERE role = 'user'");
     $stats['total_users'] = $stmt->fetch()['count'];
 
-    // Total Active Loans
     $stmt = $pdo->query("SELECT COUNT(*) as count FROM loans WHERE status = 'borrowed'");
     $stats['total_loans'] = $stmt->fetch()['count'];
 
-    // Overdue Loans
     $stmt = $pdo->query("SELECT COUNT(*) as count FROM loans WHERE status IN ('borrowed', 'overdue') AND due_date < CURDATE()");
     $stats['overdue_loans'] = $stmt->fetch()['count'];
 
@@ -53,6 +49,9 @@ try {
         LIMIT 5
     ");
     $popular_books = $stmt->fetchAll();
+
+    // Pending Reviews
+    $pending_reviews = $pdo->query("SELECT COUNT(*) FROM reviews WHERE status = 'pending'")->fetchColumn();
 
 } catch (PDOException $e) {
     echo "Error: " . $e->getMessage();
@@ -81,7 +80,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <div class="flex items-center gap-4 relative group">
                         <div class="flex items-center gap-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 py-1.5 px-3 rounded-full hover:bg-gray-50 dark:hover:bg-slate-700 transition cursor-pointer shadow-sm">
                             <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">
-                                <?php 
+                                <?php
                                     $initials = '';
                                     $name_parts = explode(' ', $_SESSION['full_name'] ?? 'Admin');
                                     foreach (array_slice($name_parts, 0, 2) as $part) {
@@ -96,7 +95,7 @@ require_once __DIR__ . '/../includes/header.php';
                             </div>
                             <i class="ph ph-caret-down text-gray-500 ml-1"></i>
                         </div>
-                        
+
                         <!-- Dropdown Menu -->
                         <div class="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                             <div class="p-1">
@@ -217,22 +216,29 @@ require_once __DIR__ . '/../includes/header.php';
             <!-- Quick Actions -->
             <div class="mt-8 card p-6">
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Aksi Cepat</h2>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                     <a href="/perpustakaan/admin/books.php" class="p-6 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl hover:border-primary hover:bg-primary/5 transition flex flex-col items-center justify-center gap-3">
                         <i class="ph ph-books text-3xl text-primary"></i>
-                        <p class="font-medium text-gray-900 dark:text-white">Kelola Buku</p>
+                        <p class="font-medium text-gray-900 dark:text-white text-sm text-center">Kelola Buku</p>
                     </a>
                     <a href="/perpustakaan/admin/categories.php" class="p-6 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl hover:border-primary hover:bg-primary/5 transition flex flex-col items-center justify-center gap-3">
                         <i class="ph ph-tag text-3xl text-primary"></i>
-                        <p class="font-medium text-gray-900 dark:text-white">Kategori</p>
+                        <p class="font-medium text-gray-900 dark:text-white text-sm text-center">Kategori</p>
                     </a>
                     <a href="/perpustakaan/admin/users.php" class="p-6 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl hover:border-primary hover:bg-primary/5 transition flex flex-col items-center justify-center gap-3">
                         <i class="ph ph-users text-3xl text-primary"></i>
-                        <p class="font-medium text-gray-900 dark:text-white">Pengguna</p>
+                        <p class="font-medium text-gray-900 dark:text-white text-sm text-center">Pengguna</p>
                     </a>
                     <a href="/perpustakaan/admin/publishers.php" class="p-6 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl hover:border-primary hover:bg-primary/5 transition flex flex-col items-center justify-center gap-3">
                         <i class="ph ph-buildings text-3xl text-primary"></i>
-                        <p class="font-medium text-gray-900 dark:text-white">Penerbit</p>
+                        <p class="font-medium text-gray-900 dark:text-white text-sm text-center">Penerbit</p>
+                    </a>
+                    <a href="/perpustakaan/admin/reviews.php?status=pending" class="p-6 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/10 transition flex flex-col items-center justify-center gap-3 relative">
+                        <i class="ph ph-star text-3xl text-amber-500"></i>
+                        <p class="font-medium text-gray-900 dark:text-white text-sm text-center">Review</p>
+                        <?php if (!empty($pending_reviews) && $pending_reviews > 0): ?>
+                        <span class="absolute top-3 right-3 text-xs bg-amber-500 text-white font-bold w-5 h-5 rounded-full flex items-center justify-center"><?php echo $pending_reviews; ?></span>
+                        <?php endif; ?>
                     </a>
                 </div>
             </div>

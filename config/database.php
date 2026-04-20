@@ -128,14 +128,15 @@ function slugify($text) {
     return strtolower($text);
 }
 
-function generateStars($rating) {
-    $full = floor($rating);
-    $half = ($rating - $full) >= 0.5 ? 1 : 0;
+function generateStars($rating, $size = 'text-base') {
+    $full  = (int)floor($rating);
+    $half  = ($rating - $full) >= 0.5 ? 1 : 0;
     $empty = 5 - $full - $half;
-    
-    $stars = str_repeat('★', $full);
-    if ($half) $stars .= '✯';
-    $stars .= str_repeat('☆', $empty);
-    
-    return $stars;
+
+    $html = '';
+    for ($i = 0; $i < $full;  $i++) $html .= '<i class="ph-fill ph-star ' . $size . ' text-amber-400"></i>';
+    if ($half)                       $html .= '<i class="ph-fill ph-star-half ' . $size . ' text-amber-400"></i>';
+    for ($i = 0; $i < $empty; $i++) $html .= '<i class="ph ph-star ' . $size . ' text-gray-300 dark:text-gray-600"></i>';
+
+    return $html;
 }
