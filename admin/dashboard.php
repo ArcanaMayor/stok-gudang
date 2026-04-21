@@ -6,7 +6,6 @@ checkAdmin();
 
 $page_title = 'Dashboard';
 
-// Get Statistics
 $stats = [
     'total_books'   => 0,
     'total_users'   => 0,
@@ -27,7 +26,6 @@ try {
     $stmt = $pdo->query("SELECT COUNT(*) as count FROM loans WHERE status IN ('borrowed', 'overdue') AND due_date < CURDATE()");
     $stats['overdue_loans'] = $stmt->fetch()['count'];
 
-    // Recent Loans
     $stmt = $pdo->query("
         SELECT l.*, u.full_name, b.title, b.cover_image
         FROM loans l
@@ -38,7 +36,6 @@ try {
     ");
     $recent_loans = $stmt->fetchAll();
 
-    // Popular Books
     $stmt = $pdo->query("
         SELECT b.*, a.name as author_name, COUNT(l.id) as loan_count
         FROM books b
@@ -50,7 +47,6 @@ try {
     ");
     $popular_books = $stmt->fetchAll();
 
-    // Pending Reviews
     $pending_reviews = $pdo->query("SELECT COUNT(*) FROM reviews WHERE status = 'pending'")->fetchColumn();
 
 } catch (PDOException $e) {
@@ -63,9 +59,7 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="flex">
     <?php require_once __DIR__ . '/../includes/sidebar.php'; ?>
 
-    <!-- Main Content -->
     <div class="flex-1 ml-64 min-h-screen bg-gray-50 dark:bg-gray-900">
-        <!-- Top Navbar -->
         <nav class="navbar sticky top-0 z-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-16">
@@ -96,7 +90,6 @@ require_once __DIR__ . '/../includes/header.php';
                             <i class="ph ph-caret-down text-gray-500 ml-1"></i>
                         </div>
 
-                        <!-- Dropdown Menu -->
                         <div class="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                             <div class="p-1">
                                 <a href="/perpustakaan/auth/logout.php" class="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
@@ -110,9 +103,7 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
         </nav>
 
-        <!-- Content -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Statistics Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div class="stat-card flex items-center gap-4">
                     <div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
@@ -156,7 +147,6 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Recent Loans -->
                 <div class="card p-6">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white">Peminjaman Terbaru</h2>
@@ -199,7 +189,6 @@ require_once __DIR__ . '/../includes/header.php';
                     </div>
                 </div>
 
-                <!-- Popular Books -->
                 <div class="card p-6">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white">Buku Populer</h2>
@@ -241,7 +230,6 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
             </div>
 
-            <!-- Quick Actions -->
             <div class="mt-8 card p-6">
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Aksi Cepat</h2>
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -273,7 +261,6 @@ require_once __DIR__ . '/../includes/header.php';
 
         </div>
 
-            <!-- Footer -->
             <?php require_once __DIR__ . '/../includes/footer.php'; ?>
     </div>
 </div>

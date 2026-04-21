@@ -70,7 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $new_cover        = handleCoverUpload($_FILES['cover_image'] ?? [], $UPLOAD_DIR);
         $cover_image      = $new_cover ?? $old_cover;
 
-        // Delete old cover if replaced
         if ($new_cover && $old_cover && file_exists($UPLOAD_DIR . $old_cover)) {
             @unlink($UPLOAD_DIR . $old_cover);
         }
@@ -91,7 +90,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int)($_POST['id'] ?? 0);
         if ($id > 0) {
             try {
-                // Delete cover file if exists
                 $row = $pdo->prepare("SELECT cover_image FROM books WHERE id = ?");
                 $row->execute([$id]);
                 $cover = $row->fetchColumn();
@@ -107,7 +105,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Get all books
 try {
     $books = $pdo->query("
         SELECT b.*, c.name as category_name, a.name as author_name, p.name as publisher_name
@@ -196,7 +193,6 @@ body.dark .cover-dropzone {
             </div>
             <?php endif; ?>
 
-            <!-- Books Table -->
             <div class="card overflow-hidden">
                 <div class="table-responsive">
                     <table>
@@ -260,7 +256,6 @@ body.dark .cover-dropzone {
             </div>
         </div>
 
-        <!-- Add/Edit Modal -->
         <div id="bookModal" class="modal">
             <div class="modal-content" style="max-width:680px; max-height:90vh; overflow-y:auto;">
                 <div class="flex items-center justify-between mb-6">
@@ -275,18 +270,15 @@ body.dark .cover-dropzone {
                     <input type="hidden" name="id" id="bookId">
                     <input type="hidden" name="old_cover_image" id="oldCoverImage">
 
-                    <!-- Cover Upload -->
                     <div class="form-group mb-4">
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                             <i class="ph ph-image text-primary mr-1"></i> Cover Buku
                         </label>
                         <div class="flex gap-4 items-start">
-                            <!-- Preview -->
                             <div id="coverPreviewWrap" class="w-24 h-32 rounded-xl overflow-hidden bg-primary/5 border border-primary/20 flex items-center justify-center shrink-0">
                                 <img id="coverPreviewImg" src="" alt="" class="w-full h-full object-cover hidden">
                                 <i id="coverPreviewIcon" class="ph ph-book text-3xl text-primary/40"></i>
                             </div>
-                            <!-- Dropzone -->
                             <div class="cover-dropzone flex-1"
                                  ondragover="this.classList.add('drag-over'); event.preventDefault();"
                                  ondragleave="this.classList.remove('drag-over');"
@@ -374,7 +366,6 @@ body.dark .cover-dropzone {
             </div>
         </div>
 
-        <!-- Delete Modal -->
         <div id="deleteModal" class="modal">
             <div class="modal-content" style="max-width:420px">
                 <div class="text-center mb-6">
@@ -405,7 +396,6 @@ function previewCover(input) {
         const reader = new FileReader();
         reader.onload = e => showPreview(e.target.result);
         reader.readAsDataURL(input.files[0]);
-        // Update dropzone label
         document.getElementById('dropzoneContent').innerHTML =
             '<i class="ph ph-check-circle text-2xl text-emerald-500 mb-1 block"></i>' +
             '<p class="text-sm font-medium text-emerald-600">' + input.files[0].name + '</p>' +

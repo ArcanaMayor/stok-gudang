@@ -8,7 +8,6 @@ $page_title = 'Kelola Kategori';
 $message = '';
 $error = '';
 
-// Phosphor icon options for category picker
 $ph_icons = [
     'ph-book-open'         => 'Buku Terbuka',
     'ph-books'             => 'Koleksi Buku',
@@ -96,7 +95,6 @@ try {
     $categories = [];
 }
 
-// Palette for category accent colors (cycles by index)
 $palettes = [
     ['bg' => 'bg-indigo-100 dark:bg-indigo-900/30',  'text' => 'text-indigo-600 dark:text-indigo-400'],
     ['bg' => 'bg-emerald-100 dark:bg-emerald-900/30', 'text' => 'text-emerald-600 dark:text-emerald-400'],
@@ -113,7 +111,6 @@ require_once __DIR__ . '/../includes/header.php';
     <?php require_once __DIR__ . '/../includes/sidebar.php'; ?>
 
     <div class="flex-1 ml-64 min-h-screen bg-gray-50 dark:bg-gray-900">
-        <!-- Navbar -->
         <nav class="navbar sticky top-0 z-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-16">
@@ -139,7 +136,6 @@ require_once __DIR__ . '/../includes/header.php';
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-            <!-- Alerts -->
             <?php if ($message): ?>
             <div class="alert alert-success mb-6 fade-in">
                 <i class="ph-fill ph-check-circle text-xl"></i>
@@ -153,7 +149,6 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
             <?php endif; ?>
 
-            <!-- Categories Table -->
             <div class="card overflow-hidden">
                 <div class="p-6 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
                     <div>
@@ -177,11 +172,9 @@ require_once __DIR__ . '/../includes/header.php';
                         <tbody>
                             <?php foreach ($categories as $i => $category):
                                 $palette = $palettes[$i % count($palettes)];
-                                // Detect if icon is emoji or ph- class
                                 $is_ph = str_starts_with($category['icon'] ?? '', 'ph-');
                             ?>
                             <tr>
-                                <!-- Icon -->
                                 <td>
                                     <div class="w-10 h-10 rounded-xl <?php echo $palette['bg']; ?> flex items-center justify-center <?php echo $palette['text']; ?>">
                                         <?php if ($is_ph): ?>
@@ -192,7 +185,6 @@ require_once __DIR__ . '/../includes/header.php';
                                     </div>
                                 </td>
 
-                                <!-- Name -->
                                 <td>
                                     <p class="font-semibold text-gray-900 dark:text-white"><?php echo htmlspecialchars($category['name']); ?></p>
                                     <?php if (!empty($category['slug'])): ?>
@@ -200,14 +192,12 @@ require_once __DIR__ . '/../includes/header.php';
                                     <?php endif; ?>
                                 </td>
 
-                                <!-- Description -->
                                 <td>
                                     <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 max-w-xs">
                                         <?php echo htmlspecialchars(substr($category['description'] ?? '-', 0, 90)); ?>
                                     </p>
                                 </td>
 
-                                <!-- Book Count -->
                                 <td class="text-center">
                                     <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold <?php echo $palette['bg']; ?> <?php echo $palette['text']; ?>">
                                         <i class="ph ph-books text-xs"></i>
@@ -215,7 +205,6 @@ require_once __DIR__ . '/../includes/header.php';
                                     </span>
                                 </td>
 
-                                <!-- Actions -->
                                 <td class="text-center">
                                     <div class="flex items-center justify-center gap-1">
                                         <button onclick="editCategory(<?php echo htmlspecialchars(json_encode($category)); ?>)"
@@ -249,7 +238,6 @@ require_once __DIR__ . '/../includes/header.php';
 
         </div>
 
-        <!-- Add/Edit Modal -->
         <div id="categoryModal" class="modal">
             <div class="modal-content" style="max-width: 520px;">
                 <div class="flex items-center justify-between mb-6">
@@ -268,7 +256,6 @@ require_once __DIR__ . '/../includes/header.php';
                         <input type="text" name="name" id="name" required placeholder="Contoh: Fiksi, Teknologi...">
                     </div>
 
-                    <!-- Icon Picker -->
                     <div class="form-group">
                         <label class="block mb-2">Icon Kategori</label>
                         <input type="hidden" name="icon" id="icon" value="ph-books">
@@ -301,7 +288,6 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
         </div>
 
-        <!-- Delete Modal -->
         <div id="deleteModal" class="modal">
             <div class="modal-content" style="max-width: 420px;">
                 <div class="text-center mb-6">
@@ -327,12 +313,10 @@ require_once __DIR__ . '/../includes/header.php';
 <script>
 function selectIcon(phClass) {
     document.getElementById('icon').value = phClass;
-    // Reset all
     document.querySelectorAll('.icon-btn').forEach(btn => {
         btn.classList.remove('border-primary', 'bg-primary/10', 'text-primary');
         btn.classList.add('border-gray-200', 'dark:border-gray-700', 'text-gray-500');
     });
-    // Highlight selected
     const selected = document.getElementById('icon-' + phClass);
     if (selected) {
         selected.classList.remove('border-gray-200', 'text-gray-500');
@@ -356,7 +340,6 @@ function editCategory(category) {
     document.getElementById('name').value = category.name || '';
     document.getElementById('description').value = category.description || '';
 
-    // Set icon
     const icon = category.icon && category.icon.startsWith('ph-') ? category.icon : 'ph-books';
     selectIcon(icon);
 
@@ -381,7 +364,6 @@ window.onclick = function(event) {
     if (event.target === document.getElementById('deleteModal'))     closeDeleteModal();
 };
 
-// Init icon selection on page load
 selectIcon('ph-books');
 </script>
 </body>

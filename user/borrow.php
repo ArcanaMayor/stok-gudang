@@ -262,7 +262,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                 $days_left = (strtotime($loan['due_date']) - time()) / 86400;
                             ?>
                             <div class="flex gap-4 p-4 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition">
-                                <!-- Cover -->
                                 <?php if ($has_cov): ?>
                                 <div class="w-12 h-16 rounded-lg overflow-hidden shrink-0 border border-gray-200 dark:border-gray-600 shadow-sm">
                                     <img src="/perpustakaan/assets/uploads/covers/<?php echo htmlspecialchars($loan['cover_image']); ?>"
@@ -276,7 +275,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </div>
                                 <?php endif; ?>
 
-                                <!-- Info -->
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-start justify-between gap-2 mb-2">
                                         <div class="min-w-0">

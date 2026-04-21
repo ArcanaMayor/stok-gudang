@@ -75,9 +75,7 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="flex">
     <?php require_once __DIR__ . '/../includes/sidebar.php'; ?>
 
-    <!-- Main Content -->
     <div class="flex-1 ml-64 min-h-screen bg-gray-50 dark:bg-gray-900">
-        <!-- Top Navbar -->
         <nav class="navbar sticky top-0 z-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-16">
@@ -96,7 +94,6 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
         </nav>
 
-        <!-- Content -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <?php if ($message): ?>
             <div class="alert alert-success mb-6">
@@ -112,7 +109,6 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
             <?php endif; ?>
 
-            <!-- Publishers Table -->
             <div class="card overflow-hidden">
                 <div class="table-responsive">
                     <table>
@@ -155,7 +151,6 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
             </div>
 
-<!-- Add/Edit Modal -->
 <div id="publisherModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeModal()">&times;</span>
@@ -199,7 +194,6 @@ require_once __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<!-- Delete Confirmation -->
 <div id="deleteModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeDeleteModal()">&times;</span>
@@ -263,7 +257,6 @@ window.onclick = function(event) {
 
         </div>
 
-            <!-- Footer -->
             <?php require_once __DIR__ . '/../includes/footer.php'; ?>
     </div>
 </div>

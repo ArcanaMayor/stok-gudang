@@ -8,7 +8,6 @@ $page_title = 'Manajemen Review';
 $message = '';
 $error = '';
 
-// Handle actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $action   = $_POST['action'];
     $review_id = (int)($_POST['review_id'] ?? 0);
@@ -36,14 +35,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     }
 }
 
-// Filters
 $status_filter = $_GET['status'] ?? 'all';
 $search        = trim($_GET['search'] ?? '');
 $page          = max(1, (int)($_GET['page'] ?? 1));
 $per_page      = 10;
 $offset        = ($page - 1) * $per_page;
 
-// Build query
 $where_clauses = [];
 $params        = [];
 
@@ -62,13 +59,11 @@ if ($search !== '') {
 $where_sql = $where_clauses ? 'WHERE ' . implode(' AND ', $where_clauses) : '';
 
 try {
-    // Total count
     $count_stmt = $pdo->prepare("SELECT COUNT(*) FROM reviews r JOIN books b ON r.book_id = b.id JOIN users u ON r.user_id = u.id $where_sql");
     $count_stmt->execute($params);
     $total_reviews = $count_stmt->fetchColumn();
     $total_pages   = ceil($total_reviews / $per_page);
 
-    // Reviews
     $stmt = $pdo->prepare("
         SELECT r.*, b.title as book_title, b.id as book_id,
                u.full_name, a.name as author_name
@@ -109,7 +104,6 @@ require_once __DIR__ . '/../includes/header.php';
     <?php require_once __DIR__ . '/../includes/sidebar.php'; ?>
 
     <div class="flex-1 ml-64 min-h-screen bg-gray-50 dark:bg-gray-900">
-        <!-- Navbar -->
         <nav class="navbar sticky top-0 z-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-16">
@@ -157,7 +151,6 @@ require_once __DIR__ . '/../includes/header.php';
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-            <!-- Alerts -->
             <?php if ($message): ?>
             <div class="alert alert-success mb-6 fade-in">
                 <i class="ph-fill ph-check-circle text-xl"></i>
@@ -171,7 +164,6 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
             <?php endif; ?>
 
-            <!-- Status Summary Cards -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 <a href="?status=all" class="stat-card flex items-center gap-4 hover:border-primary transition <?php echo $status_filter === 'all' ? 'border-primary border-2' : ''; ?>">
                     <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 shrink-0">
@@ -211,7 +203,6 @@ require_once __DIR__ . '/../includes/header.php';
                 </a>
             </div>
 
-            <!-- Filters & Search -->
             <div class="card p-4 mb-6">
                 <form method="GET" class="flex flex-col sm:flex-row gap-3 items-center">
                     <input type="hidden" name="status" value="<?php echo htmlspecialchars($status_filter); ?>">
@@ -234,7 +225,6 @@ require_once __DIR__ . '/../includes/header.php';
                 </form>
             </div>
 
-            <!-- Reviews Table -->
             <div class="card overflow-hidden">
                 <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                     <div>
@@ -257,7 +247,6 @@ require_once __DIR__ . '/../includes/header.php';
                     <?php foreach ($reviews as $review): ?>
                     <div class="p-6 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors group">
                         <div class="flex flex-col lg:flex-row lg:items-start gap-4">
-                            <!-- User Info -->
                             <div class="flex items-start gap-3 lg:w-48 shrink-0">
                                 <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">
                                     <?php echo strtoupper(substr($review['full_name'], 0, 1)); ?>
@@ -268,7 +257,6 @@ require_once __DIR__ . '/../includes/header.php';
                                 </div>
                             </div>
 
-                            <!-- Review Content -->
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-start justify-between gap-2 mb-2">
                                     <div>
@@ -277,7 +265,6 @@ require_once __DIR__ . '/../includes/header.php';
                                         </p>
                                         <p class="text-xs text-gray-500"><?php echo htmlspecialchars($review['author_name']); ?></p>
                                     </div>
-                                    <!-- Star Rating -->
                                     <div class="flex items-center gap-1 shrink-0">
                                         <?php for ($i = 1; $i <= 5; $i++): ?>
                                         <i class="ph-fill ph-star text-sm <?php echo $i <= $review['rating'] ? 'text-amber-400' : 'text-gray-200 dark:text-gray-600'; ?>"></i>
@@ -290,9 +277,7 @@ require_once __DIR__ . '/../includes/header.php';
                                 </p>
                             </div>
 
-                            <!-- Status & Actions -->
                             <div class="flex flex-row lg:flex-col items-center lg:items-end gap-3 shrink-0">
-                                <!-- Status Badge -->
                                 <div>
                                     <?php if ($review['status'] === 'pending'): ?>
                                     <span class="badge badge-warning flex items-center gap-1">
@@ -309,7 +294,6 @@ require_once __DIR__ . '/../includes/header.php';
                                     <?php endif; ?>
                                 </div>
 
-                                <!-- Action Buttons -->
                                 <div class="flex items-center gap-2">
                                     <?php if ($review['status'] !== 'approved'): ?>
                                     <form method="POST" class="inline">
@@ -354,7 +338,6 @@ require_once __DIR__ . '/../includes/header.php';
                     <?php endforeach; ?>
                 </div>
 
-                <!-- Pagination -->
                 <?php if ($total_pages > 1): ?>
                 <div class="p-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
                     <p class="text-sm text-gray-500">
@@ -384,7 +367,6 @@ require_once __DIR__ . '/../includes/header.php';
                 <?php endif; ?>
 
                 <?php else: ?>
-                <!-- Empty State -->
                 <div class="py-20 text-center">
                     <div class="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
                         <i class="ph ph-chat-dots text-4xl text-gray-400"></i>

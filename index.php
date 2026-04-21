@@ -105,7 +105,6 @@ require_once __DIR__ . '/includes/header.php';
             
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
                 <?php foreach ($categories as $index => $cat):
-                    // Use icon from DB if it's a Phosphor class, otherwise fallback
                     $cat_icon = !empty($cat['icon']) && str_starts_with($cat['icon'], 'ph-')
                         ? $cat['icon']
                         : 'ph-books';

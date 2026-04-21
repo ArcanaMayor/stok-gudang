@@ -65,7 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             try {
                 if ($user_review) {
-                    // Edit: reset to pending so admin re-moderates
                     $stmt = $pdo->prepare("UPDATE reviews SET rating = ?, comment = ?, status = 'pending', updated_at = NOW() WHERE book_id = ? AND user_id = ?");
                     $stmt->execute([$rating, $comment, $book_id, $_SESSION['user_id']]);
                     $message = 'Ulasan diperbarui dan menunggu persetujuan admin.';
@@ -74,7 +73,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt->execute([$book_id, $_SESSION['user_id'], $rating, $comment]);
                     $message = 'Ulasan berhasil dikirim! Menunggu persetujuan admin.';
                 }
-                // Refresh user_review data after save
                 $stmt = $pdo->prepare("SELECT * FROM reviews WHERE book_id = ? AND user_id = ?");
                 $stmt->execute([$book_id, $_SESSION['user_id']]);
                 $user_review = $stmt->fetch();
@@ -225,7 +223,6 @@ require_once __DIR__ . '/../includes/header.php';
                 ?>
 
                 <?php if ($is_pending): ?>
-                <!-- Pending state: read-only card -->
                 <div class="mb-8 p-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-xl">
                     <div class="flex items-start gap-4">
                         <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-800/40 flex items-center justify-center shrink-0">
@@ -235,7 +232,6 @@ require_once __DIR__ . '/../includes/header.php';
                             <h3 class="font-bold text-amber-800 dark:text-amber-300 mb-1">Ulasan Menunggu Persetujuan</h3>
                             <p class="text-sm text-amber-700 dark:text-amber-400 mb-4">Ulasan Anda sedang ditinjau oleh admin dan akan segera dipublikasikan.</p>
 
-                            <!-- Read-only preview of their review -->
                             <div class="bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-700/40 rounded-xl p-4">
                                 <div class="flex items-center gap-0.5 mb-2">
                                     <?php echo generateStars((int)$user_review['rating']); ?>
@@ -253,7 +249,6 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
 
                 <?php else: ?>
-                <!-- Form: new review or edit after approved/rejected -->
                 <div class="mb-8 p-6 bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 rounded-xl">
                     <?php if ($user_review && $review_status === 'rejected'): ?>
                     <div class="flex items-center gap-2 mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/40 rounded-lg">

@@ -272,7 +272,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
             </div>
 
-            <!-- Aksi Cepat -->
+
             <div class="mb-8 card p-6">
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Aksi Cepat</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -291,7 +291,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
             </div>
 
-            <!-- Tabel Katalog Buku dengan Kolom Rating -->
+
             <div class="card overflow-hidden">
                 <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                     <div class="flex items-center gap-3">
@@ -364,7 +364,6 @@ require_once __DIR__ . '/../includes/header.php';
                                         <a href="/perpustakaan/user/reviews.php?book_id=<?php echo $book['id']; ?>"
                                            class="inline-flex flex-col items-center gap-0.5 group/rating"
                                            title="Klik untuk memberi ulasan buku ini">
-                                            <!-- Bintang rating -->
                                             <div class="flex items-center gap-0.5">
                                                 <?php
                                                 $avg = (float)$book['avg_rating'];
@@ -379,7 +378,6 @@ require_once __DIR__ . '/../includes/header.php';
                                                 endfor;
                                                 ?>
                                             </div>
-                                            <!-- Tulisan Ulasan yang bisa diklik -->
                                             <span class="text-xs font-semibold text-primary group-hover/rating:text-primary-dark group-hover/rating:underline transition-colors flex items-center gap-0.5">
                                                 <i class="ph ph-chat-dots text-xs"></i>
                                                 Ulasan

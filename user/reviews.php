@@ -94,7 +94,7 @@ require_once __DIR__ . '/../includes/header.php';
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-            <!-- Alerts -->
+
             <?php if ($message): ?>
             <div class="alert alert-success mb-6 fade-in">
                 <i class="ph-fill ph-check-circle text-xl"></i>
@@ -108,7 +108,6 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
             <?php endif; ?>
 
-            <!-- Stats Row -->
             <div class="grid grid-cols-3 gap-4 mb-8">
                 <div class="stat-card flex items-center gap-4">
                     <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
@@ -140,7 +139,6 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Sidebar: Books to Review -->
                 <div class="lg:col-span-1">
                     <div class="card p-6">
                         <div class="flex items-center gap-2 mb-5">
@@ -183,7 +181,7 @@ require_once __DIR__ . '/../includes/header.php';
                     </div>
                 </div>
 
-                <!-- Main: My Reviews -->
+
                 <div class="lg:col-span-2">
                     <div class="card overflow-hidden">
                         <div class="p-6 border-b border-gray-100 dark:border-gray-700">
@@ -196,7 +194,6 @@ require_once __DIR__ . '/../includes/header.php';
                         <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
                             <?php foreach ($reviews as $review): ?>
                             <div class="p-6 hover:bg-gray-50 dark:hover:bg-slate-800/40 transition-colors">
-                                <!-- Header -->
                                 <div class="flex items-start justify-between gap-4 mb-3">
                                     <div class="flex-1 min-w-0">
                                         <a href="/perpustakaan/user/book_detail.php?id=<?php echo $review['book_id']; ?>"
@@ -206,7 +203,6 @@ require_once __DIR__ . '/../includes/header.php';
                                         <p class="text-sm text-gray-500 mt-0.5"><?php echo htmlspecialchars($review['author_name']); ?></p>
                                     </div>
 
-                                    <!-- Status Badge -->
                                     <div class="shrink-0">
                                         <?php if ($review['status'] === 'pending'): ?>
                                         <span class="badge badge-warning flex items-center gap-1 text-xs">
@@ -224,7 +220,7 @@ require_once __DIR__ . '/../includes/header.php';
                                     </div>
                                 </div>
 
-                                <!-- Star Rating -->
+                                
                                 <div class="flex items-center gap-1.5 mb-3">
                                     <?php for ($i = 1; $i <= 5; $i++): ?>
                                     <i class="ph-fill ph-star text-sm <?php echo $i <= $review['rating'] ? 'text-amber-400' : 'text-gray-200 dark:text-gray-600'; ?>"></i>
@@ -232,12 +228,12 @@ require_once __DIR__ . '/../includes/header.php';
                                     <span class="text-xs text-gray-500 ml-1"><?php echo $review['rating']; ?>/5</span>
                                 </div>
 
-                                <!-- Comment -->
+
                                 <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4 line-clamp-3">
                                     <?php echo nl2br(htmlspecialchars($review['comment'])); ?>
                                 </p>
 
-                                <!-- Footer -->
+                                
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs text-gray-400 flex items-center gap-1">
                                         <i class="ph ph-clock text-xs"></i>
@@ -246,14 +242,12 @@ require_once __DIR__ . '/../includes/header.php';
 
                                     <div class="flex items-center gap-2">
                                         <?php if ($review['status'] === 'pending'): ?>
-                                        <!-- Pending: locked, cannot edit -->
                                         <span class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-amber-600 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 rounded-lg cursor-not-allowed"
                                               title="Tidak dapat diedit saat menunggu persetujuan">
                                             <i class="ph ph-lock text-sm"></i> Terkunci
                                         </span>
 
                                         <?php elseif ($review['status'] === 'rejected'): ?>
-                                        <!-- Rejected: allow edit -->
                                         <a href="/perpustakaan/user/book_detail.php?id=<?php echo $review['book_id']; ?>#review"
                                            class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 dark:border-red-700/40 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                            title="Perbaiki dan kirim ulang">
@@ -261,7 +255,6 @@ require_once __DIR__ . '/../includes/header.php';
                                         </a>
 
                                         <?php else: ?>
-                                        <!-- Approved: allow edit -->
                                         <a href="/perpustakaan/user/book_detail.php?id=<?php echo $review['book_id']; ?>#review"
                                            class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-primary border border-primary/30 rounded-lg hover:bg-primary/5 transition-colors">
                                             <i class="ph ph-pencil-simple text-sm"></i> Edit
@@ -295,7 +288,6 @@ require_once __DIR__ . '/../includes/header.php';
                             <?php endforeach; ?>
                         </div>
                         <?php else: ?>
-                        <!-- Empty State -->
                         <div class="py-20 text-center">
                             <div class="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
                                 <i class="ph ph-chat-dots text-4xl text-gray-400"></i>
